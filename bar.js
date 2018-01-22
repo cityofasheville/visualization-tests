@@ -3,6 +3,8 @@ class BarChart {
     // TODO:
         // use aria or a11y or whatever, change data set to include details, attach those details with data binding
         // fix deprecation warning-- use setTargetAtTime rather than GainNode.gain.value
+        // add title?
+        // make grouped bar
 
 	constructor(parentElement) {
 		this.parentElement = d3.select(parentElement)
@@ -154,9 +156,15 @@ class BarChart {
         //     .attr('height', d => this.y(d.length));
 
         const xAxisElements = svg.append('g')
+            .attr('role', 'presentation')
+            .attr('aria-hidden', 'true')
             .attr('class', 'x axis')
             .attr('transform', `translate(0 ${this.graphHeight + this.verticalMargins})`)
             .call(xAxis);
+
+        xAxisElements.selectAll('*')
+            .attr('role', 'presentation')
+            .attr('aria-hidden', 'true')
 
         xAxisElements.selectAll('path, line')
             .style('shape-rendering', 'crispEdges');
