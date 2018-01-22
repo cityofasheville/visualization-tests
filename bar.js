@@ -4,7 +4,10 @@ class BarChart {
         // use aria or a11y or whatever, change data set to include details, attach those details with data binding
         // fix deprecation warning-- use setTargetAtTime rather than GainNode.gain.value
         // add title?
-        // make grouped bar
+        // make grouped bar for nested data
+        // add labeled by and described by
+        // what is expected data format?
+        // media query for high contrast mode?
 
 	constructor(parentElement) {
 		this.parentElement = d3.select(parentElement)
@@ -119,6 +122,7 @@ class BarChart {
             .attr('width', this.width)
             .attr('height', this.height)
             .attr('role', 'group')
+            .attr('tabindex', '0')
 
         const xAxis = d3.axisBottom()
             .scale(this.histX)
@@ -128,7 +132,8 @@ class BarChart {
         const barGroup = svg.append('g')
             .attr('class', 'bar-group')
             .attr('role', 'list') // so that screen readers will announce number of items in list
-            .attr('aria-label', 'bar graph')
+            .attr('aria-label', 'The bars of the bar graph')
+            .attr('tabindex', '0')
 
         const bars = barGroup.selectAll('.bar')
             .data(this.xData);
@@ -146,6 +151,8 @@ class BarChart {
         bars.enter().append('rect')
             .attr('class', 'bar')
             .attr('role', 'listitem') // so screen reader will know it's in the list
+            .attr('tabindex', '0')
+            .attr('aria-label', d => d.length)
             .attr('y',  d => this.verticalMargins + this.graphHeight - this.y(d.length))
             .attr('height', d => this.y(d.length))
             .attr('width', barWidth)
