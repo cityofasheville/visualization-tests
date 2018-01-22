@@ -116,6 +116,7 @@ class BarChart {
             .attr('preserveAspectRatio', 'xMinYMin meet')
             .attr('width', this.width)
             .attr('height', this.height)
+            .attr('role', 'group')
 
         const xAxis = d3.axisBottom()
             .scale(this.histX)
@@ -124,6 +125,8 @@ class BarChart {
 
         const barGroup = svg.append('g')
             .attr('class', 'bar-group')
+            .attr('role', 'list') // so that screen readers will announce number of items in list
+            .attr('aria-label', 'bar graph')
 
         const bars = barGroup.selectAll('.bar')
             .data(this.xData);
@@ -140,6 +143,7 @@ class BarChart {
 
         bars.enter().append('rect')
             .attr('class', 'bar')
+            .attr('role', 'listitem') // so screen reader will know it's in the list
             .attr('y',  d => this.verticalMargins + this.graphHeight - this.y(d.length))
             .attr('height', d => this.y(d.length))
             .attr('width', barWidth)
