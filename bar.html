@@ -45,17 +45,17 @@
     </style>
     <script type="text/javascript">
         function makeData(length = 40) {
-            const possiblies = 'string'
-            return new Array(length).fill({}).map(function() {
+            const possiblies = 'sphinx of black quartz judge my vow';
+            return new Array(length).fill({}).map(function () {
                 return {
                     str: possiblies[Math.floor(Math.random() * possiblies.length)],
-                    val: Math.floor(Math.random() * 10)
-                }
-            })
+                    val: Math.floor(Math.random() * 10),
+                };
+            });
         }
-        document.addEventListener("DOMContentLoaded", function() {
-            const chart = new BarChart(document.getElementById('parent'), makeData(), 'str')
-        })
+        document.addEventListener('DOMContentLoaded', function () {
+            new BarChart(document.getElementById('parent'), makeData(), 'str');
+        });
     </script>
 </head>
 <body>
