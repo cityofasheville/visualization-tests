@@ -104,7 +104,7 @@ class BarChart {
         const pushed = d3.event.keyCode
         const volumeScale = d3.scaleLinear().domain([100, 1500]).range([2, .3]);
 
-        if (pushed != 37 && pushed != 39) return
+        if (pushed != 37 && pushed != 39) return;
 
         if (this.highlightedBarIndex === null) {
             // If this is the first time a user has pressed an arrow key
@@ -115,9 +115,9 @@ class BarChart {
             this.highlightedBarIndex += 1
         }
 
-        const numBars = this.bars.length
+        const numBars = this.bars.length;
+        // If subtracting one made it negative, go to the last bar
         this.highlightedBarIndex = this.highlightedBarIndex < 0 ? numBars + this.highlightedBarIndex : this.highlightedBarIndex % numBars;
-
         this.bars[this.highlightedBarIndex].focus()
     }
 
@@ -139,7 +139,7 @@ class BarChart {
         const barGroup = svg.append('g')
             .attr('class', 'bar-group')
             .attr('role', 'list') // so that screen readers will announce number of items in list
-            .attr('aria-label', 'The bars of the bar graph')
+            .attr('aria-label', 'bar graph')
             .attr('tabindex', '0')
 
         const bars = barGroup.selectAll('.bar')
@@ -153,16 +153,24 @@ class BarChart {
         const padding = this.graphWidth / this.xData.length * 0.1 
         const barWidth = this.graphWidth / this.xData.length - padding
 
+        const self = this
         bars.enter().append('rect')
             .attr('class', 'bar')
             .attr('role', 'listitem') // so screen reader will know it's in the list
             .attr('tabindex', '-1')
-            .attr('aria-label', d => d.length)
+            .attr('aria-label', function(d) {
+                return `X value range: ${self.prettyFormatDate(d.x0)} to ${self.prettyFormatDate(d.x1)}.  Y value: ${d.length}.`
+            })
             .attr('y',  d => this.verticalMargins + this.graphHeight - this.y(d.length))
             .attr('height', d => this.y(d.length))
             .attr('width', barWidth)
             .attr('transform', d => `translate(${this.histX(d.x1) + padding}, 0)`)
             .on('focus', (d, i) => this.handleBarFocus(d, i))
+            .on('blur', function() {
+                d3.select(this)
+                    .classed('highlighted', false)
+                    .attr('tabindex', '-1')
+            })
 
         const xAxisElements = svg.append('g')
             .attr('role', 'presentation')
@@ -206,6 +214,10 @@ class BarChart {
     //         .attr('y',  d => self.verticalMargins + self.graphHeight - y(d.length))
 
     // }
+
+    prettyFormatDate(date) {
+        return new Date(date).toLocaleDateString('en-US', {year: 'numeric', month: 'long'})
+    }
 
     makeData(length = 400) {
         return new Array(length).fill({}).map(function() {
