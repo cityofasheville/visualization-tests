@@ -8,6 +8,7 @@ class BarChart {
         // add labeled by and described by
         // what is expected data format?
         // media query for high contrast mode?
+        // make tooltip that works with mouse or keyboard
 
 	constructor(parentElement) {
 		this.parentElement = d3.select(parentElement)
@@ -55,43 +56,31 @@ class BarChart {
         this.draw()
 
         this.bars = d3.selectAll('.bar').nodes() // should be selection of all bars
-        this.highlightedBarIndex = 0
-
-        const self = this
-        d3.select('body').on('keydown', function() {
-            self.handleArrowKey()
-        })
-        this.handleArrowKey()
-
-        // rapid key presses create sound only?  or user can switch between overview vs detail mode?
+        this.highlightedBarIndex = null
+        this.parentElement.on('keydown', () => this.handleArrowKey())
 	}
 
     addGraphAlt() {
         // Bar graph with x axis showing [label] and y axis showing [label].
         // Span of values on x axis is [domain], span of values on y axis is [domain].
         // Mean, median, mode, max, min
-
     }
 
-    handleArrowKey() {
-        const pushed = d3.event ? d3.event.keyCode : 0
+    handleBarFocus(data, index) {
+        this.highlightedBarIndex = index
+        const highlightedBar = d3.select(this.bars[index])
         const volumeScale = d3.scaleLinear().domain([100, 1500]).range([2, .3]);
-        d3.select(this.bars[this.highlightedBarIndex]).classed('highlighted', false)
 
-        if (pushed === 37) {
-            this.highlightedBarIndex -= 1
-        } else if (pushed === 39) {
-            this.highlightedBarIndex += 1
-        }
-
-        const numBars = this.bars.length
-        this.highlightedBarIndex = this.highlightedBarIndex < 0 ? numBars + this.highlightedBarIndex : this.highlightedBarIndex % numBars;
-
-        const highlightedBar = d3.select(this.bars[this.highlightedBarIndex])
+        d3.selectAll(this.bars)
+            .classed('highlighted', false)
+            .attr('tabindex', '-1')
         
-        highlightedBar.classed('highlighted', true)
+        highlightedBar
+            .classed('highlighted', true)
+            .attr('tabindex', '0')
 
         const self = this
+
         highlightedBar.attr('d', function(d) {
             // Audio functionality from: http://bl.ocks.org/aholachek/6e18a82c0f0ada144b854f788c07d7a4
             const oscillator = self.context.createOscillator();
@@ -108,10 +97,28 @@ class BarChart {
             // this rapidly ramps sound down
             gainNode.gain.setTargetAtTime(0, self.context.currentTime, .3);
         })
-        /*
-        TODO:
-            make tooltip that works with mouse or keyboard
-        */
+
+    }
+
+    handleArrowKey() {
+        const pushed = d3.event.keyCode
+        const volumeScale = d3.scaleLinear().domain([100, 1500]).range([2, .3]);
+
+        if (pushed != 37 && pushed != 39) return
+
+        if (this.highlightedBarIndex === null) {
+            // If this is the first time a user has pressed an arrow key
+            this.highlightedBarIndex = 0
+        } else if (pushed === 37) {
+            this.highlightedBarIndex -= 1
+        } else if (pushed === 39) {
+            this.highlightedBarIndex += 1
+        }
+
+        const numBars = this.bars.length
+        this.highlightedBarIndex = this.highlightedBarIndex < 0 ? numBars + this.highlightedBarIndex : this.highlightedBarIndex % numBars;
+
+        this.bars[this.highlightedBarIndex].focus()
     }
 
 
@@ -146,21 +153,16 @@ class BarChart {
         const padding = this.graphWidth / this.xData.length * 0.1 
         const barWidth = this.graphWidth / this.xData.length - padding
 
-        const self = this
-
         bars.enter().append('rect')
             .attr('class', 'bar')
             .attr('role', 'listitem') // so screen reader will know it's in the list
-            .attr('tabindex', '0')
+            .attr('tabindex', '-1')
             .attr('aria-label', d => d.length)
             .attr('y',  d => this.verticalMargins + this.graphHeight - this.y(d.length))
             .attr('height', d => this.y(d.length))
             .attr('width', barWidth)
-            .attr('transform', d => `translate(${self.histX(d.x1) + padding}, 0)`)
-
-        // bars.transition()
-        //     .duration(750)
-        //     .attr('height', d => this.y(d.length));
+            .attr('transform', d => `translate(${this.histX(d.x1) + padding}, 0)`)
+            .on('focus', (d, i) => this.handleBarFocus(d, i))
 
         const xAxisElements = svg.append('g')
             .attr('role', 'presentation')
