@@ -40,8 +40,8 @@ class Histogram {
             const n = d3.scaleLinear()
                 .domain([0, actualMax])
                 .range([0, span]);
-            d.pitch = 220 * Math.pow(Math.pow(2, 1/span), n(d.length));
-        })
+            d.pitch = 220 * Math.pow(Math.pow(2, 1 / span), n(d.length));
+        });
 
         this.draw();
         this.bars = d3.selectAll('.bar').nodes(); // should be selection of all bars
@@ -153,7 +153,7 @@ class Histogram {
             .attr('width', barWidth)
             .attr('transform', d => `translate(${this.histX(d.x0) + padding + this.horizontalMargins}, 0)`)
             .on('focus', (d, i) => this.handleBarFocus(d, i))
-            .on('blur', function() {
+            .on('blur', function () {
                 d3.select(this)
                     .classed('highlighted', false)
                     .attr('tabindex', '-1');
