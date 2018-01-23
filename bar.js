@@ -12,47 +12,45 @@ class BarChart {
 
 	constructor(parentElement, inputData, xKey) {
 		this.parentElement = d3.select(parentElement)
-        inputData√.sort((a, b) => a - b)
 
+        const data = d3.nest()
+            .key(d => d[xKey])
+            .entries(inputData)
 
 		this.width = this.parentElement.style('width').replace('px', '')
 		this.height = this.parentElement.style('height').replace('px', '')
         this.verticalMargins = this.height * 0.1
         this.horizontalMargins = this.width * 0.1
 
-        this.originalTimeDomain = [new Date(1990, 1), new Date(2017, 1)]
-
         this.graphWidth = this.width - this.horizontalMargins * 2
         this.graphHeight = this.height - this.verticalMargins * 2
 
         this.context = new AudioContext()
 
-        this.histX = d3.scaleTime()
-            .domain(this.originalTimeDomain)
-            .rangeRound([0, this.graphWidth]);
+        this.x = d3.scaleBand()
+            .rangeRound([0, this.graphWidth])
+            .padding(0.1)
+            .domain(data.map(d => d.key))
 
-        this.histLayout = d3.histogram()
-            .thresholds(this.histX.ticks(this.graphWidth / 10))
-
-        this.xData = this.histLayout(inputData);
-
-        const yMin = d3.min(this.xData, d => d.length);
-        const yMax = d3.max(this.xData, d => d.length);
+        const yMin = d3.min(data, d => d.values.length);
+        const yMax = d3.max(data, d => d.values.length);
 
         this.y = d3.scaleLinear()
-            .domain([yMin, yMax])
-            .range([0, this.graphHeight]);
+            .rangeRound([this.graphHeight, 0])
+            .domain([0, yMax])
 
-        this.xData.map(function(d) {
-            const actualMax = (yMax - yMin) < 36 ? (parseInt(yMax / 12) + 12) : (yMax - yMin)
-            const span = Math.min(actualMax, 36)
+        data.map(function(d) {
+            const moreTonalMax = (yMax - yMin) < 36 ? (parseInt(yMax / 12) + 12) : (yMax - yMin)
+            const span = Math.min(moreTonalMax, 36)
+
             const n = d3.scaleLinear()
-                .domain([0, actualMax])
+                .domain([yMin, yMax])
                 .range([0, span]);
-            d.pitch = 220 * Math.pow(Math.pow(2, 1/span), n(d.length))
+
+            d.pitch = 220 * Math.pow(Math.pow(2, 1/span), n(d.values.length))
         })
 
-        this.draw()
+        this.draw(data)
         this.bars = d3.selectAll('.bar').nodes() // should be selection of all bars
         this.highlightedBarIndex = null
         this.parentElement.on('keydown', () => this.handleArrowKey())
@@ -130,9 +128,12 @@ class BarChart {
             .attr('tabindex', '0')
 
         const xAxis = d3.axisBottom()
-            .scale(this.histX)
-            .ticks(d3.timeYear, 1)
-            .tickFormat(d => `${new Date(d).toLocaleDateString('en-US', {year: 'numeric'})}`);
+            .scale(this.x)
+            // .ticks(d3.timeYear, 1)
+            // .tickFormat(d => `${new Date(d).toLocaleDateString('en-US', {year: 'numeric'})}`);
+
+        const yAxis = d3.axisLeft(this.y)
+            // .ticks(10)
 
         const barGroup = svg.append('g')
             .attr('class', 'bar-group')
@@ -141,15 +142,14 @@ class BarChart {
             .attr('tabindex', '0')
 
         const bars = barGroup.selectAll('.bar')
-            .data(this.xData);
+            .data(inputData);
 
         bars.exit()
             .transition()
             .duration(750)
             .attr('height', 0);
 
-        const padding = this.graphWidth / this.xData.length * 0.1
-        const barWidth = this.graphWidth / this.xData.length - padding
+        const barWidth = this.graphWidth / inputData.length
 
         const self = this
         bars.enter().append('rect')
@@ -157,12 +157,12 @@ class BarChart {
             .attr('role', 'listitem') // so screen reader will know it's in the list
             .attr('tabindex', '-1')
             .attr('aria-label', function(d) {
-                return `X value range: ${self.prettyFormatDate(d.x0)} to ${self.prettyFormatDate(d.x1)}.  Y value: ${d.length}.`
+                return `X value: ${d.key}.  Y value: ${d.values.length}.`
             })
-            .attr('y',  d => this.verticalMargins + this.graphHeight - this.y(d.length))
-            .attr('height', d => this.y(d.length))
-            .attr('width', barWidth)
-            .attr('transform', d => `translate(${this.histX(d.x0) + padding + this.horizontalMargins}, 0)`)
+            .attr('x', d => this.x(d.key) + this.horizontalMargins)
+            .attr('y',  d => this.verticalMargins + this.y(d.values.length))
+            .attr('width', this.x.bandwidth())
+            .attr('height', d => this.graphHeight - this.y(d.values.length))
             .on('focus', (d, i) => this.handleBarFocus(d, i))
             .on('blur', function() {
                 d3.select(this)
@@ -182,6 +182,21 @@ class BarChart {
             .attr('aria-hidden', 'true')
 
         xAxisElements.selectAll('path, line')
+            .style('shape-rendering', 'crispEdges');
+
+
+        const yAxisElements = svg.append('g')
+            .attr('role', 'presentation')
+            .attr('aria-hidden', 'true')
+            .attr('class', 'y axis')
+            .attr('transform', `translate(${this.horizontalMargins} ${this.verticalMargins})`)
+            .call(yAxis);
+
+        yAxisElements.selectAll('*')
+            .attr('role', 'presentation')
+            .attr('aria-hidden', 'true')
+
+        yAxisElements.selectAll('path, line')
             .style('shape-rendering', 'crispEdges');
     }
 
