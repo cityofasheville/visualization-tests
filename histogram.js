@@ -1,4 +1,4 @@
-class BarChart {
+class Histogram {
 
     // TODO:
         // use aria or a11y or whatever, change data set to include details, attach those details with data binding
