@@ -2,10 +2,8 @@ class FlowGraph{
 
     /*
      * TODO
-     * determine X value by days since start
      * make minimal directed graph after: https://bl.ocks.org/mbostock/3750558, except in v4: https://bl.ocks.org/mbostock/4062045
      * figure out positioning of nodes instead of force layout-- maybe just programmatically "stick" them
-     * style graph to look like a flow chart
      * keyboard nav
      */
 
@@ -13,30 +11,40 @@ class FlowGraph{
         this.parentElement = d3.select(parentElement);
         this.width = this.parentElement.style('width').replace('px', '');
         this.height = this.parentElement.style('height').replace('px', '');
-        this.verticalMargins = this.height * 0.1;
+        this.verticalMargins = this.height * 0.01;
         this.horizontalMargins = this.width * 0.01;
-        // id is assigned to link nodes-- format should be pac1, applicant1, planReview1, etc
-        // step is the first place in the process where a step appears-- so if it appears more than once, the first appearance is listed
         /* node format is
         {
             title:,
             id: ,
-            firstAppearanceDaysSinceStart: ,
+            dayMarker: ,
         }, */
         this.data = levelOne;
-
         this.render()
     }
 
     render() {
-        const xBase = this.width / 16
+        const nodePadding = 5;
+        const dayValues = this.data.nodes.map(d => d.dayMarker);
+        const dayValMin = d3.min(dayValues)
+        const daySpan = d3.max(dayValues) + Math.abs(dayValMin) + 1;
+        const xBase = (this.width - this.horizontalMargins * 2 - nodePadding * daySpan) / daySpan;
+
+        this.data.nodes.map(d => {
+            if (d.dayMarker === null) { return; }
+            const dayIndex = dayValMin < 0 ? d.dayMarker + Math.abs(dayValMin) : d.dayMarker;
+            d.fx = (dayIndex * xBase) + this.horizontalMargins + (dayIndex * nodePadding);
+            return d;
+        })
 
         const svg = this.parentElement.append('svg')
             .attr('width', this.width)
             .attr('height', this.height)
 
         const simulation = d3.forceSimulation()
-            .force("link", d3.forceLink().id(function(d) { return d.id; }))
+            .force("link", d3.forceLink()
+                .id(function(d) { return d.id; })
+            )
             .force("charge", d3.forceManyBody())
             .force("center", d3.forceCenter(this.width / 2, this.height / 2));
 
@@ -48,8 +56,8 @@ class FlowGraph{
                 .style('stroke', 'black')
                 .style('stroke-width', '2px')
 
-        const nodeHeight = 100;
-        const nodeWidth = 100
+        const nodeWidth = xBase - nodePadding * 2;
+        const nodeHeight = 50;
 
         const node = svg.append("g")
             .attr("class", "nodes")
@@ -65,17 +73,17 @@ class FlowGraph{
                 .style('stroke', 'dodgerblue')
                 .style('fill', 'white')
 
-        // .append("text")
-        // .text(function(d) { return d.title; })
+        node.append("text")
+            .text(function(d) { return d.title; })
 
         simulation
             .nodes(this.data.nodes.map(d => {
+                // console.log(d.fx)
                 d.fy = d.id % 1 === 0 ? this.height / 3 : d.fy = this.height / 2 + nodeHeight
-                if (d.firstAppearanceDaysSinceStart === null) { d.fy = this.height / 2 + nodeHeight}
-                d.fx = xBase * (d.firstAppearanceDaysSinceStart + 2) + this.horizontalMargins
+                if (d.dayMarker === null) { d.fy = this.height / 2 + nodeHeight}
                 return d;
             }))
-            // .attr("fx", d => xBase * d.firstAppearanceDaysSinceStart)
+            // .attr("fx", d => xBase * d.dayMarker)
             .on("tick", ticked);
 
         simulation.force("link")
