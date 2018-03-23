@@ -28,7 +28,7 @@ class FlowGraph{
         const dayValues = this.data.nodes.map(d => d.dayMarker);
         const dayValMin = d3.min(dayValues)
         const daySpan = d3.max(dayValues) + Math.abs(dayValMin) + 1;
-        const xBase = (this.width - this.horizontalMargins * 2 - nodePadding * daySpan) / daySpan;
+        const xBase = (this.width - this.horizontalMargins - nodePadding * daySpan) / daySpan;
 
         this.data.nodes.map(d => {
             if (d.dayMarker === null) { return; }
@@ -57,7 +57,7 @@ class FlowGraph{
                 .style('stroke-width', '2px')
 
         const nodeWidth = xBase - nodePadding * 2;
-        const nodeHeight = 50;
+        const nodeHeight = 100;
 
         const node = svg.append("g")
             .attr("class", "nodes")
@@ -67,23 +67,25 @@ class FlowGraph{
                 .call(d3.drag()
                     .on("start", dragstarted)
                     .on("drag", dragged))
-                .append("rect")
-                .attr("width", nodeWidth)
-                .attr("height", nodeHeight)
-                .style('stroke', 'dodgerblue')
-                .style('fill', 'white')
+
+        node.append("rect")
+            .attr("width", nodeWidth)
+            .attr("height", nodeHeight)
+            .style('stroke', 'dodgerblue')
+            .style('fill', 'white')
 
         node.append("text")
-            .text(function(d) { return d.title; })
+            .attr('dy', 1.2)
+            .attr('dx', 1)
+            .text(d => d.title.toLowerCase() )
+            .call(wrap, nodeWidth)
 
         simulation
             .nodes(this.data.nodes.map(d => {
-                // console.log(d.fx)
                 d.fy = d.id % 1 === 0 ? this.height / 3 : d.fy = this.height / 2 + nodeHeight
                 if (d.dayMarker === null) { d.fy = this.height / 2 + nodeHeight}
                 return d;
             }))
-            // .attr("fx", d => xBase * d.dayMarker)
             .on("tick", ticked);
 
         simulation.force("link")
@@ -96,9 +98,8 @@ class FlowGraph{
                 .attr("y1", function(d) { return d.source.y + nodeHeight / 2; })
                 .attr("x2", function(d) { return d.target.x + nodeWidth / 2; })
                 .attr("y2", function(d) { return d.target.y + nodeHeight / 2; });
-            node
-                .attr("x", function(d) { return d.x; })
-                .attr("y", function(d) { return d.y; });
+
+            node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
         }
 
 
@@ -113,5 +114,30 @@ class FlowGraph{
             d.fy = d3.event.y;
         }
 
+        function wrap(text, width) {
+          text.each(function() {
+            var text = d3.select(this),
+                words = text.text().split(/\s+/).reverse(),
+                word,
+                line = [],
+                y = text.attr("y"),
+                dy = parseFloat(text.attr("dy")),
+                tspan = text.text(null).append("tspan").attr("x", nodeWidth * 0.05).attr("y", y).attr("dy", dy + "em");
+
+            while (word = words.pop()) {
+              line.push(word);
+              tspan.text(line.join(" "));
+              if (tspan.node().getComputedTextLength() > (width - (nodeWidth * 0.05) * 2)) {
+                line.pop();
+                tspan.text(line.join(" "));
+                line = [word];
+                tspan = text.append("tspan")
+                    .attr("x", nodeWidth * 0.05)
+                    .attr("dy", "1.2em")
+                    .text(word);
+              }
+            }
+          });
+        }
     }
 }
