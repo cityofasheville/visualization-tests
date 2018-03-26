@@ -11,14 +11,8 @@ class FlowGraph{
         this.parentElement = d3.select(parentElement);
         this.width = this.parentElement.style('width').replace('px', '');
         this.height = this.parentElement.style('height').replace('px', '');
-        this.verticalMargins = this.height * 0.1;
-        this.horizontalMargins = this.width * 0.1;
-        /* node format is
-        {
-            title:,
-            id: ,
-            dayMarker: ,
-        }, */
+        this.verticalMargins = this.height * 0.05;
+        this.horizontalMargins = this.width * 0.025;
         this.data = levelOne;
         this.render()
     }
@@ -61,7 +55,7 @@ class FlowGraph{
                 .id(d => d.id)
             )
             .force('charge', d3.forceCollide())
-            .force('center', d3.forceCenter(this.width / 2, this.height / 2))
+            .force('center', d3.forceCenter(this.width / 2, this.height / (maxNodesForOneDay + 1)))
 
         const link = svg.append('g')
             .attr('class', 'links')
@@ -77,9 +71,9 @@ class FlowGraph{
             .selectAll('g')
             .data(this.data.nodes)
                 .enter().append('g')
-                .call(d3.drag()
-                    .on('start', dragstarted)
-                    .on('drag', dragged))
+                // .call(d3.drag()
+                //     .on('start', dragstarted)
+                //     .on('drag', dragged))
 
         node.append('rect')
             .attr('width', nodeWidth)
@@ -91,16 +85,21 @@ class FlowGraph{
             .style('fill', '#e6f2ff')
 
 
-        node.append('foreignObject')
+        const nodeContent = node.append('foreignObject')
             .attr('x', d => d.x)
             .attr('y', d => d.y)
             .attr('width', nodeWidth)
             .attr('height', nodeHeight)
-            .style('padding', nodeWidth * 0.05)
+            .style('padding', `0 ${nodeWidth * 0.025}`)
             .style('text-align', 'center')
             .append('xhtml:div')
+
+        nodeContent.append('p')
             .html(d => d.title)
             .style('font-weight', 'bold')
+
+        nodeContent.append('p')
+            .html('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.')
 
         simulation
             .nodes(this.data.nodes)
