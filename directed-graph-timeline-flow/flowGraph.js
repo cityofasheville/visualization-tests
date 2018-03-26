@@ -74,11 +74,15 @@ class FlowGraph{
             .style('stroke', 'dodgerblue')
             .style('fill', 'white')
 
-        node.append("text")
-            .attr('dy', 1.2)
-            .attr('dx', 1)
-            .text(d => d.title.toLowerCase() )
-            .call(wrap, nodeWidth)
+        node.append('foreignObject')
+            .attr('x', d => d.x)
+            .attr('y', d => d.y)
+            .attr('width', nodeWidth)
+            .attr('height', nodeHeight)
+            .style('padding', nodeWidth * 0.05)
+            .style('text-align', 'center')
+            .append('xhtml:div')
+            .html(d => d.title)
 
         simulation
             .nodes(this.data.nodes.map(d => {
@@ -91,7 +95,6 @@ class FlowGraph{
         simulation.force("link")
             .links(this.data.links);
 
-
         function ticked() {
             link
                 .attr("x1", function(d) { return d.source.x + nodeWidth / 2; })
@@ -102,7 +105,6 @@ class FlowGraph{
             node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
         }
 
-
         function dragstarted(d) {
             if (!d3.event.active) simulation.alphaTarget(0.3).restart();
             d.fx = d.x;
@@ -112,32 +114,6 @@ class FlowGraph{
         function dragged(d) {
             d.fx = d3.event.x;
             d.fy = d3.event.y;
-        }
-
-        function wrap(text, width) {
-          text.each(function() {
-            var text = d3.select(this),
-                words = text.text().split(/\s+/).reverse(),
-                word,
-                line = [],
-                y = text.attr("y"),
-                dy = parseFloat(text.attr("dy")),
-                tspan = text.text(null).append("tspan").attr("x", nodeWidth * 0.05).attr("y", y).attr("dy", dy + "em");
-
-            while (word = words.pop()) {
-              line.push(word);
-              tspan.text(line.join(" "));
-              if (tspan.node().getComputedTextLength() > (width - (nodeWidth * 0.05) * 2)) {
-                line.pop();
-                tspan.text(line.join(" "));
-                line = [word];
-                tspan = text.append("tspan")
-                    .attr("x", nodeWidth * 0.05)
-                    .attr("dy", "1.2em")
-                    .text(word);
-              }
-            }
-          });
         }
     }
 }
