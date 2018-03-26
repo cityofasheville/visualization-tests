@@ -1,12 +1,5 @@
 class FlowGraph{
 
-    /*
-     * TODO
-     * make minimal directed graph after: https://bl.ocks.org/mbostock/3750558, except in v4: https://bl.ocks.org/mbostock/4062045
-     * figure out positioning of nodes instead of force layout-- maybe just programmatically 'stick' them
-     * keyboard nav
-     */
-
     constructor(parentElement) {
         this.parentElement = d3.select(parentElement);
         this.width = this.parentElement.style('width').replace('px', '');
@@ -18,7 +11,7 @@ class FlowGraph{
     }
 
     render() {
-        const nodePadding = 5;
+        const nodePadding = 8;
         const dayValues = this.data.nodes.map(d => d.dayMarker);
         const dayValMin = d3.min(dayValues)
         const daySpan = d3.max(dayValues) + Math.abs(dayValMin);
@@ -120,15 +113,15 @@ class FlowGraph{
 
         simulation.alphaTarget(1).restart()
 
-        function dragstarted(d) {
-            if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-            d.fx = d.x;
-            d.fy = d.y;
-        }
+        // function dragstarted(d) {
+        //     if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+        //     d.fx = d.x;
+        //     d.fy = d.y;
+        // }
 
-        function dragged(d) {
-            d.fx = d3.event.x;
-            d.fy = d3.event.y;
-        }
+        // function dragged(d) {
+        //     d.fx = d3.event.x;
+        //     d.fy = d3.event.y;
+        // }
     }
 }
