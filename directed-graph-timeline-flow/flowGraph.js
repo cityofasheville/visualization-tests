@@ -4,38 +4,46 @@ class FlowGraph{
         this.parentElement = d3.select(parentElement);
         this.width = this.parentElement.style('width').replace('px', '');
         this.height = this.parentElement.style('height').replace('px', '');
-        this.verticalMargins = this.height * 0.05;
+        this.verticalMargins = this.height * 0.025;
         this.horizontalMargins = this.width * 0.025;
         this.data = levelOne;
         this.render()
     }
 
     render() {
-        const nodePadding = 8;
+        const nodePadding = {
+            x: 5,
+            y: 35,
+        };
         const dayValues = this.data.nodes.map(d => d.dayMarker);
         const dayValMin = d3.min(dayValues)
         const daySpan = d3.max(dayValues) + Math.abs(dayValMin);
-        const maxNodesForOneDay = this.data.nodes.map(d => d.dayMarker)
-            .filter((d, i, dayMarkerArray) => dayMarkerArray.indexOf(d) === i)
-            .map(d => {
-                return {
-                    dayMarker: d,
-                    numRepeats: this.data.nodes.filter(node => node.dayMarker === d).length
-                }
-            })
-            .sort((a, b) => a.numRepeats < b.numRepeats)[0].numRepeats
 
-        const xBase = (this.width - this.horizontalMargins * 2 - nodePadding * daySpan) / (daySpan + 1);
-        const yBase = (this.height - this.verticalMargins * 2 - nodePadding * maxNodesForOneDay) / (maxNodesForOneDay);
-        const nodeWidth = xBase - nodePadding * 2;
-        const nodeHeight = yBase - nodePadding * 2;
+        this.data.nodes = this.data.nodes.map(d => {
+            d.numRepeats = this.data.nodes.filter(node => node.dayMarker === d.dayMarker).length
+            return d;
+        })
+        .sort((a, b) => a.numRepeats < b.numRepeats)
+
+
+        const maxNodesForOneDay = this.data.nodes[0].numRepeats;
+        const xBase = (this.width - this.horizontalMargins * 2 - nodePadding.x * daySpan) / (daySpan + 1);
+        const yBase = (this.height - this.verticalMargins * 2 - nodePadding.y * maxNodesForOneDay) / (maxNodesForOneDay);
+        const nodeWidth = xBase - nodePadding.x * 2;
+        const nodeHeight = yBase - nodePadding.y * 2;
 
         this.data.nodes.map(d => {
             if (d.dayMarker === null) { return d; }
             const dayIndex = dayValMin < 0 ? d.dayMarker + Math.abs(dayValMin) : d.dayMarker;
-            d.fx =  this.horizontalMargins + (dayIndex * xBase) + ((dayIndex + 1) * nodePadding);
+            d.fx =  this.horizontalMargins + (dayIndex * xBase) + ((dayIndex + 1) * nodePadding.x);
+
             const nodeLevel = d.id.split('.')[1]
-            d.fy = this.verticalMargins + (nodeLevel * yBase) + ((+nodeLevel + 1) * nodePadding);
+            // Top aligned:
+            // d.fy = this.verticalMargins + (nodeLevel * yBase) + ((+nodeLevel + 1) * nodePadding.y);
+
+            // Center aligned:
+            d.fy = (this.height / 2)  - (yBase * (d.numRepeats / 2.0)) + (nodeLevel * yBase)
+
             return d;
         })
 
@@ -55,7 +63,7 @@ class FlowGraph{
             .selectAll('line')
             .data(this.data.links)
                 .enter().append('line')
-                .style('stroke', 'black')
+                .style('stroke', '#003366')
                 .style('stroke-width', '3px')
 
 
@@ -73,26 +81,30 @@ class FlowGraph{
             .attr('height', nodeHeight)
             .attr('rx', '15')
             .attr('ry', '15')
-            .style('stroke', 'dodgerblue')
+            .style('stroke', '#003366')
             .style('stroke-width', '3')
             .style('fill', '#e6f2ff')
-
 
         const nodeContent = node.append('foreignObject')
             .attr('x', d => d.x)
             .attr('y', d => d.y)
             .attr('width', nodeWidth)
             .attr('height', nodeHeight)
-            .style('padding', `0 ${nodeWidth * 0.025}`)
+            .style('padding', `0 ${nodeWidth * 0.05}`)
             .style('text-align', 'center')
+            .style('color', '#003366')
             .append('xhtml:div')
 
-        nodeContent.append('p')
+        nodeContent
+            .append('h4')
             .html(d => d.title)
             .style('font-weight', 'bold')
 
-        nodeContent.append('p')
-            .html('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.')
+        nodeContent.selectAll('p')
+            .data(d => d.infoLinks || [])
+            .enter().append('p')
+            .html(d => `<a href='${d.url}' rel='noopener noreferrer' target='_blank'>${d.text}</a>`)
+            .style('text-align', 'left')
 
         simulation
             .nodes(this.data.nodes)

@@ -5,17 +5,35 @@ const levelOne = {
         {
             title: 'Early Assistance Session',
             dayMarker: -2,
-            id: '0.0'
+            id: '0.0',
+            infoLinks: [
+                {
+                    text: 'Schedule an optional early assistance meeting',
+                    url: 'https://develop.early-assistance.ashevillenc.gov/'
+                }
+            ]
         },
         {
             title: 'Commercial Review Application',
             dayMarker: 0,
-            id: '1.0'
+            id: '1.0',
+            infoLinks: [
+                {
+                    text: 'Submit plans for review on the development portal',
+                    url: 'https://develop.plans.ashevillenc.gov/'
+                }
+            ]
         },
         {
             title: 'Staff Reviews Development Plan',
             dayMarker: 3,
-            id: '2.0'
+            id: '2.0',
+            infoLinks: [
+                {
+                    text: 'Track your site development application status with Accela Citizen Access',
+                    url: 'https://services.ashevillenc.gov/citizenaccess/'
+                }
+            ]
         },
         {
             title: 'Staff Transmits Review Comments',
@@ -32,11 +50,6 @@ const levelOne = {
             title: 'Revision and Resubmission Required',
             dayMarker: 6,
             id: '4.1'
-        },
-        {
-            title: 'Applicant Revises Plans',
-            dayMarker: null,
-            id: '5.0'
         },
     ],
     links: [
@@ -62,11 +75,7 @@ const levelOne = {
         },
         {
             source: '4.1',
-            target: '5.0'
-        },
-        {
-            source: '5.0',
             target: '1.0'
-        }
+        },
     ]
 }
