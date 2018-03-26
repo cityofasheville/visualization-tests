@@ -5,22 +5,22 @@ const levelOne = {
         {
             title: 'Early Assistance Session',
             dayMarker: -2,
-            id: '0'
+            id: '0.0'
         },
         {
             title: 'Commercial Review Application',
             dayMarker: 0,
-            id: '1'
+            id: '1.0'
         },
         {
-            title: 'Staff Development Plan Review',
+            title: 'Staff Reviews Development Plan',
             dayMarker: 3,
-            id: '2'
+            id: '2.0'
         },
         {
-            title: 'Staff Development Plan Review Comments Transmitted',
+            title: 'Staff Transmits Review Comments',
             dayMarker: 5,
-            id: '3'
+            id: '3.0'
         },
         {
     // 4 AND 4.1 BECAUSE THEY HAPPEN AT SAME TIME-- like version numbers, not decimals (4.1, 2, 3 ... 11, etc)
@@ -29,44 +29,44 @@ const levelOne = {
             id: '4.0'
         },
         {
-            title: 'Revisions Required',
+            title: 'Revision and Resubmission Required',
             dayMarker: 6,
             id: '4.1'
         },
         {
             title: 'Applicant Revises Plans',
             dayMarker: null,
-            id: '5'
+            id: '5.0'
         },
     ],
     links: [
         {
-            source: '0',
-            target: '1'
+            source: '0.0',
+            target: '1.0'
         },
         {
-            source: '1',
-            target: '2'
+            source: '1.0',
+            target: '2.0'
         },
         {
-            source: '2',
-            target: '3'
+            source: '2.0',
+            target: '3.0'
         },
         {
-            source: '3',
+            source: '3.0',
             target: '4.0'
         },
         {
-            source: '3',
+            source: '3.0',
             target: '4.1'
         },
         {
             source: '4.1',
-            target: '5'
+            target: '5.0'
         },
         {
-            source: '5',
-            target: '1'
+            source: '5.0',
+            target: '1.0'
         }
     ]
 }
