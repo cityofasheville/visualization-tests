@@ -1,36 +1,35 @@
 class FlowGraph{
 
-    constructor(parentElement) {
+    constructor(parentElement, inputData = levelOne) {
         this.parentElement = d3.select(parentElement);
         this.width = this.parentElement.style('width').replace('px', '');
         this.height = this.parentElement.style('height').replace('px', '');
-        this.verticalMargins = this.height * 0.025;
-        this.horizontalMargins = this.width * 0.025;
-        this.data = levelOne;
+        this.verticalMargins = this.height * 0.05;
+        this.horizontalMargins = this.width * 0.015;
+        this.data = inputData;
         this.render()
     }
 
     render() {
         const nodePadding = {
-            x: 5,
-            y: 35,
+            x: 7.5,
+            y: 50,
         };
         const dayValues = this.data.nodes.map(d => d.dayMarker);
         const dayValMin = d3.min(dayValues)
         const daySpan = d3.max(dayValues) + Math.abs(dayValMin);
 
         this.data.nodes = this.data.nodes.map(d => {
-            d.numRepeats = this.data.nodes.filter(node => node.dayMarker === d.dayMarker).length
+            d.numRepeats = this.data.nodes.filter(node => node.dayMarker === d.dayMarker || node.dayMarker === null).length
             return d;
         })
         .sort((a, b) => a.numRepeats < b.numRepeats)
-
 
         const maxNodesForOneDay = this.data.nodes[0].numRepeats;
         const xBase = (this.width - this.horizontalMargins * 2 - nodePadding.x * daySpan) / (daySpan + 1);
         const yBase = (this.height - this.verticalMargins * 2 - nodePadding.y * maxNodesForOneDay) / (maxNodesForOneDay);
         const nodeWidth = xBase - nodePadding.x * 2;
-        const nodeHeight = yBase - nodePadding.y * 2;
+        let nodeHeight = yBase - nodePadding.y * 2;
 
         this.data.nodes.map(d => {
             if (d.dayMarker === null) { return d; }
@@ -50,6 +49,7 @@ class FlowGraph{
         const svg = this.parentElement.append('svg')
             .attr('width', this.width)
             .attr('height', this.height)
+            .attr('tabindex', 0)
 
         const simulation = d3.forceSimulation()
             .force('link', d3.forceLink()
@@ -72,17 +72,25 @@ class FlowGraph{
             .selectAll('g')
             .data(this.data.nodes)
                 .enter().append('g')
+                .style('cursor', 'pointer')
+                .on('mouseover', function() {
+                    d3.select(this).select('.nodeShape').style('fill', '#cce5ff')
+                })
+                .on('mouseout', function() {
+                    d3.select(this).select('.nodeShape').style('fill', '#e6f2ff')
+                })
                 // .call(d3.drag()
                 //     .on('start', dragstarted)
                 //     .on('drag', dragged))
 
         node.append('rect')
+            .attr('class', 'nodeShape')
             .attr('width', nodeWidth)
             .attr('height', nodeHeight)
             .attr('rx', '15')
             .attr('ry', '15')
             .style('stroke', '#003366')
-            .style('stroke-width', '3')
+            .style('stroke-width', '0.1')
             .style('fill', '#e6f2ff')
 
         const nodeContent = node.append('foreignObject')
@@ -90,21 +98,39 @@ class FlowGraph{
             .attr('y', d => d.y)
             .attr('width', nodeWidth)
             .attr('height', nodeHeight)
-            .style('padding', `0 ${nodeWidth * 0.05}`)
+            .style('padding', `0 ${nodeWidth * 0.025}`)
             .style('text-align', 'center')
             .style('color', '#003366')
             .append('xhtml:div')
 
         nodeContent
-            .append('h4')
+            .append('p')
             .html(d => d.title)
             .style('font-weight', 'bold')
 
-        nodeContent.selectAll('p')
-            .data(d => d.infoLinks || [])
-            .enter().append('p')
-            .html(d => `<a href='${d.url}' rel='noopener noreferrer' target='_blank'>${d.text}</a>`)
-            .style('text-align', 'left')
+        nodeContent.append('p')
+            .html(d => d.shortDesc)
+            // .style('text-align', 'left')
+
+        // const tallestNode = node.selectAll('div')
+        //     .nodes()
+        //     .map(function(thisNode) {
+        //         return thisNode.getBoundingClientRect()
+        //     })
+        //     .sort((a, b) => b.height - a.height)[0]
+
+
+        // const svgNode = svg.node()
+        // const tallNodePoint = svgNode.createSVGPoint()
+        // tallNodePoint.x = tallestNode.width
+        // tallNodePoint.y = tallestNode.height
+        // const svgTallNodePoint = tallNodePoint.matrixTransform(svgNode.getScreenCTM().inverse())
+
+        // nodeHeight = svgTallNodePoint.y
+
+        // console.log(svgTallNodePoint)
+
+        // d3.selectAll('rect, foreignObject').attr('height', `${nodeHeight}px`)
 
         simulation
             .nodes(this.data.nodes)

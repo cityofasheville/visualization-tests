@@ -4,11 +4,13 @@ const levelOne = {
     nodes: [
         {
             title: 'Early Assistance Session',
-            dayMarker: -2,
+            dayMarker: -1,
             id: '0.0',
+            shortDesc: "optional paid service to discuss code and development questions with staff",
+            longDesc: "The Early Assistance program provides a non-mandatory flexible review session for prospective business owners, developers, and designers to receive expert technical advice from staff during the preliminary phase of a project.",
             infoLinks: [
                 {
-                    text: 'Schedule an optional early assistance meeting',
+                    text: 'schedule an early assistance meeting',
                     url: 'https://develop.early-assistance.ashevillenc.gov/'
                 }
             ]
@@ -48,7 +50,7 @@ const levelOne = {
         },
         {
             title: 'Revision and Resubmission Required',
-            dayMarker: 6,
+            dayMarker: null,
             id: '4.1'
         },
     ],
