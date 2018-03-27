@@ -6,7 +6,7 @@ const levelOne = {
             title: 'Early Assistance Session',
             dayMarker: -1,
             id: '0.0',
-            shortDesc: "optional paid service to discuss code and development questions with staff",
+            shortDesc: "Optional paid service to discuss code and development questions with staff",
             longDesc: "The Early Assistance program provides a non-mandatory flexible review session for prospective business owners, developers, and designers to receive expert technical advice from staff during the preliminary phase of a project.",
             infoLinks: [
                 {
@@ -19,6 +19,7 @@ const levelOne = {
             title: 'Commercial Review Application',
             dayMarker: 0,
             id: '1.0',
+            shortDesc: "blablabla",
             infoLinks: [
                 {
                     text: 'Submit plans for review on the development portal',
