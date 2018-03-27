@@ -24,6 +24,7 @@ class FlowGraph{
 
         // Append titles and text to a div
         // TODO: abstract this and the other method somewhere-- this is hacky and terrible
+        // Also, base positioning and stuff on this rather than the other way around
         const testNodes = d3.select('body').append('div')
             // .style('display', 'none')
             .attr('id', 'test-node')
@@ -44,7 +45,6 @@ class FlowGraph{
 
         testNodes.selectAll('p').style('padding', '3px')
 
-
         this.data.nodes = this.data.nodes.map(d => {
             d.numRepeats = this.data.nodes.filter(node => node.dayMarker === d.dayMarker || node.dayMarker === null).length
             return d;
@@ -53,6 +53,9 @@ class FlowGraph{
         const maxNodesForOneDay = this.data.nodes[0].numRepeats;
         const yBase = (this.height - this.verticalMargins * 2 - nodePadding.y * maxNodesForOneDay) / (maxNodesForOneDay);
         let nodeHeight = yBase - nodePadding.y * 2;
+
+        const tallestNode = document.getElementById('test-node').offsetHeight
+        nodeHeight = tallestNode
 
         this.data.nodes.map(d => {
             if (d.dayMarker === null) { return d; }
@@ -136,10 +139,9 @@ class FlowGraph{
         nodeContent.append('p')
             .html(d => d.shortDesc)
 
-        const tallestNode = document.getElementById('test-node').offsetHeight
-        nodeHeight = tallestNode
-
-        d3.selectAll('rect, foreignObject').attr('height', `${nodeHeight}px`)
+        // const tallestNode = document.getElementById('test-node').offsetHeight
+        // nodeHeight = tallestNode
+        // d3.selectAll('rect, foreignObject').attr('height', `${nodeHeight}px`)
 
         simulation
             .nodes(this.data.nodes)

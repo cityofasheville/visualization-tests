@@ -19,7 +19,7 @@ const levelOne = {
             title: 'Commercial Review Application',
             dayMarker: 0,
             id: '1.0',
-            shortDesc: "blablabla",
+            shortDesc: "garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage",
             infoLinks: [
                 {
                     text: 'Submit plans for review on the development portal',
