@@ -23,7 +23,7 @@ class FlowGraph{
         const nodeWidth = xBase - nodePadding.x * 2;
 
         // This is necessary because it applies to text height test nodes and real nodes
-        d3.select('body').append('style').html(`
+        this.parentElement.append('style').html(`
             .flowGraph-node {
                 width: ${nodeWidth}px;
                 text-align: center;
@@ -39,7 +39,7 @@ class FlowGraph{
 
         // Append titles and text to a div
         // Also, base positioning and stuff on this rather than the other way around
-        const testNodes = d3.select('body').append('div')
+        const testNodes = this.parentElement.append('div')
             .attr('id', 'test-nodes')
             .selectAll('div')
             .data(this.data.nodes)
@@ -133,6 +133,7 @@ class FlowGraph{
                 .on('mouseout', function() {
                     d3.select(this).select('.nodeShape').style('fill', '#e6f2ff')
                 })
+                .on('click', d => this.renderModal(d))
                 // .call(d3.drag()
                 //     .on('start', dragstarted)
                 //     .on('drag', dragged))
@@ -201,5 +202,45 @@ class FlowGraph{
     renderModal(d) {
         // Given the datum, pop up a modal showing details
         // Modal should have little x in corner that removes it when clicked
+
+        this.parentElement.select('svg')
+            .style('opacity', 0.25)
+            .selectAll('*')
+                .attr('pointer-events', 'none')
+
+        const modalContainer = d3.select('body').append('div')
+            .attr('display', 'block')
+            .style('width', '60%')
+            .style('height', '60%')
+            .style('position', 'absolute')
+            .style('top', '20%')
+            .style('left', '20%')
+            .style('background-color', '#e6f2ff')
+            .style('border-radius', '15px')
+            .style('border', '1px solid #003366')
+
+        modalContainer.append('h2')
+            .html(`${d.title} Details`)
+            .style('text-align', 'center')
+
+        modalContainer.append('p')
+            .html(d.longDesc)
+            .style('padding', '2% 6%')
+
+        modalContainer.append('div')
+            .html('X')
+            .style('font-weight', 'bolder')
+            .style('position', 'absolute')
+            .style('top', '2%')
+            .style('right', '2%')
+            .style('cursor', 'pointer')
+            .on('click', () => {
+                modalContainer.remove()
+                this.parentElement.select('svg')
+                    .style('opacity', 1)
+                    .selectAll('*')
+                    .attr('pointer-events', null)
+            })
+
     }
 }
