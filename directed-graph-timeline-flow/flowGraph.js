@@ -67,7 +67,6 @@ class FlowGraph{
         // const yBase = (this.height - this.verticalMargins * 2 - nodePadding.y * maxNodesForOneDay) / (maxNodesForOneDay);
         // let nodeHeight = yBase - nodePadding.y * 2;
 
-
         this.data.nodes.map(d => {
             if (d.dayMarker === null) { return d; }
             const dayIndex = dayValMin < 0 ? d.dayMarker + Math.abs(dayValMin) : d.dayMarker;
@@ -86,6 +85,17 @@ class FlowGraph{
             .attr('height', this.height)
             .attr('tabindex', 0)
 
+        svg.append('defs')
+            .append('marker')
+                .attr('id', 'arrowhead')
+                .attr('markerWidth', 10)
+                .attr('markerHeight', 7)
+                .attr('refX', nodeWidth / 2)
+                .attr('refY', 3.5)
+                .attr('orient', 'auto')
+                .append('polygon')
+                    .attr('points', '0 0, 10 3.5, 0 7')
+
         const simulation = d3.forceSimulation()
             .force('link', d3.forceLink()
                 .id(d => d.id)
@@ -95,11 +105,15 @@ class FlowGraph{
 
         const link = svg.append('g')
             .attr('class', 'links')
-            .selectAll('line')
+            .selectAll('g')
             .data(this.data.links)
-                .enter().append('line')
-                .style('stroke', '#003366')
-                .style('stroke-width', '3px')
+                .enter().append('g')
+
+
+        link.append('line')
+            .style('stroke', '#003366')
+            .style('stroke-width', '3px')
+            .attr('marker-end', 'url(#arrowhead)')
 
         const node = svg.append('g')
             .attr('class', 'nodes')
@@ -151,7 +165,8 @@ class FlowGraph{
             .links(this.data.links);
 
         function ticked() {
-            link
+
+            link.select('line')
                 .attr('x1', function(d) { return d.source.x + nodeWidth / 2; })
                 .attr('y1', function(d) { return d.source.y + nodeHeight / 2; })
                 .attr('x2', function(d) { return d.target.x + nodeWidth / 2; })
@@ -161,6 +176,8 @@ class FlowGraph{
         }
 
         simulation.alphaTarget(1).restart()
+
+        link.append('circle')
 
         function dragstarted(d) {
             if (!d3.event.active) simulation.alphaTarget(0.3).restart();
@@ -172,5 +189,10 @@ class FlowGraph{
             d.fx = d3.event.x;
             d.fy = d3.event.y;
         }
+    }
+
+    renderModal(d) {
+        // Given the datum, pop up a modal showing details
+        // Modal should have little x in corner that removes it when clicked
     }
 }
