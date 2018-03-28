@@ -74,7 +74,7 @@ class FlowGraph{
             // Top aligned:
             // d.fy = this.verticalMargins + (nodeLevel * yBase)
             // Middle of the page horizontally aligned:
-            d.fy = (this.height / 2)  - (yBase * (maxNodesForOneDay / 2.0)) + (nodeLevel * yBase)
+            d.fy = Math.max((this.height / 2)  - (yBase * (maxNodesForOneDay / 2.0)), this.verticalMargins) + (nodeLevel * yBase)
 
             if (d.dayMarker === null) { return d; }
             const dayIndex = this.dayValMin < 0 ? d.dayMarker + Math.abs(this.dayValMin) : d.dayMarker;
