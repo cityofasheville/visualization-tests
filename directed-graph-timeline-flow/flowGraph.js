@@ -13,7 +13,7 @@ class FlowGraph{
     render() {
         const nodePadding = {
             x: 7.5,
-            y: 5,
+            y: 20,
         };
 
         const dayValues = this.data.nodes.map(d => d.dayMarker);
@@ -22,28 +22,37 @@ class FlowGraph{
         const xBase = (this.width - this.horizontalMargins * 2 - nodePadding.x * daySpan) / (daySpan + 1);
         const nodeWidth = xBase - nodePadding.x * 2;
 
+        // This is necessary because it applies to text height test nodes and real nodes
+        d3.select('body').append('style').html(`
+            .flowGraph-node {
+                width: ${nodeWidth}px;
+                text-align: center;
+            }
+            p {
+                padding: 3px;
+            }
+            .flowGraph-node p.title {
+                font-weight: bolder;
+                font-size: 1.15em;
+            }
+        `)
+
         // Append titles and text to a div
-        // TODO: abstract this and the other method somewhere-- this is hacky and terrible
         // Also, base positioning and stuff on this rather than the other way around
         const testNodes = d3.select('body').append('div')
-            // .style('display', 'none')
             .attr('id', 'test-node')
             .selectAll('div')
             .data(this.data.nodes)
             .enter().append('div')
+            .attr('class', 'flowGraph-node')
             .style('display', 'inline-block')
-            .style('width', `${nodeWidth}px`)
-            .style('text-align', 'center')
 
         testNodes.append('p')
+            .attr('class', 'title')
             .html(d => d.title)
-            .style('font-weight', 'bolder')
-            .style('font-size', '1.15em')
 
         testNodes.append('p')
             .html(d => d.shortDesc)
-
-        testNodes.selectAll('p').style('padding', '3px')
 
         this.data.nodes = this.data.nodes.map(d => {
             d.numRepeats = this.data.nodes.filter(node => node.dayMarker === d.dayMarker || node.dayMarker === null).length
@@ -51,11 +60,11 @@ class FlowGraph{
         })
         .sort((a, b) => a.numRepeats < b.numRepeats)
         const maxNodesForOneDay = this.data.nodes[0].numRepeats;
-        const yBase = (this.height - this.verticalMargins * 2 - nodePadding.y * maxNodesForOneDay) / (maxNodesForOneDay);
-        let nodeHeight = yBase - nodePadding.y * 2;
+        // const yBase = (this.height - this.verticalMargins * 2 - nodePadding.y * maxNodesForOneDay) / (maxNodesForOneDay);
+        // let nodeHeight = yBase - nodePadding.y * 2;
 
-        const tallestNode = document.getElementById('test-node').offsetHeight
-        nodeHeight = tallestNode
+        const nodeHeight = document.getElementById('test-node').offsetHeight
+        const yBase = nodeHeight + (nodePadding.y * 2)
 
         this.data.nodes.map(d => {
             if (d.dayMarker === null) { return d; }
@@ -65,10 +74,8 @@ class FlowGraph{
             const nodeLevel = d.id.split('.')[1]
             // Top aligned:
             // d.fy = this.verticalMargins + (nodeLevel * yBase) + ((+nodeLevel + 1) * nodePadding.y);
-
             // Center aligned:
             d.fy = (this.height / 2)  - (yBase * (d.numRepeats / 2.0)) + (nodeLevel * yBase)
-
             return d;
         })
 
@@ -91,7 +98,6 @@ class FlowGraph{
                 .enter().append('line')
                 .style('stroke', '#003366')
                 .style('stroke-width', '3px')
-
 
         const node = svg.append('g')
             .attr('class', 'nodes')
@@ -124,24 +130,16 @@ class FlowGraph{
             .attr('y', d => d.y)
             .attr('width', nodeWidth)
             .attr('height', nodeHeight)
-            .style('text-align', 'center')
             .style('color', '#003366')
             .append('xhtml:div')
-            .attr('id', d => d.id)
-            .attr('width', `${nodeWidth}px`)
+            .attr('class', 'flowGraph-node')
 
-        nodeContent
-            .append('p')
+        nodeContent.append('p')
+            .attr('class', 'title')
             .html(d => d.title)
-            .style('font-weight', 'bolder')
-            .style('font-size', '1.15em')
 
         nodeContent.append('p')
             .html(d => d.shortDesc)
-
-        // const tallestNode = document.getElementById('test-node').offsetHeight
-        // nodeHeight = tallestNode
-        // d3.selectAll('rect, foreignObject').attr('height', `${nodeHeight}px`)
 
         simulation
             .nodes(this.data.nodes)
