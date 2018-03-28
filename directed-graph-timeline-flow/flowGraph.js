@@ -7,25 +7,22 @@ class FlowGraph{
         this.verticalMargins = this.height * 0.015;
         this.horizontalMargins = this.width * 0.015;
         this.data = inputData;
-        this.render()
-    }
 
-    render() {
-        const nodePadding = {
+        this.nodePadding = {
             x: 7.5,
-            y: 20,
+            y: 10,
         };
 
         const dayValues = this.data.nodes.map(d => d.dayMarker);
-        const dayValMin = d3.min(dayValues)
-        const daySpan = d3.max(dayValues) + Math.abs(dayValMin);
-        const xBase = (this.width - this.horizontalMargins * 2 - nodePadding.x * daySpan) / (daySpan + 1);
-        const nodeWidth = xBase - nodePadding.x * 2;
+        this.dayValMin = d3.min(dayValues)
+        const daySpan = d3.max(dayValues) + Math.abs(this.dayValMin);
+        this.xBase = (this.width - this.horizontalMargins * 2 - this.nodePadding.x * daySpan) / (daySpan + 1);
+        this.nodeWidth = this.xBase - this.nodePadding.x * 2;
 
         // This is necessary because it applies to text height test nodes and real nodes
         this.parentElement.append('style').html(`
             .flowGraph-node {
-                width: ${nodeWidth}px;
+                width: ${this.nodeWidth}px;
                 text-align: center;
             }
             p {
@@ -54,8 +51,14 @@ class FlowGraph{
         testNodes.append('p')
             .html(d => d.shortDesc)
 
-        const nodeHeight = document.getElementById('test-nodes').offsetHeight
-        const yBase = nodeHeight + (nodePadding.y * 2)
+
+        // To deal with weird div height issues
+        window.addEventListener("load", () => this.render())
+    }
+
+    render() {
+        this.nodeHeight = document.getElementById('test-nodes').offsetHeight
+        const yBase = this.nodeHeight + (this.nodePadding.y * 2)
         d3.select('#test-nodes').remove()
 
         this.data.nodes = this.data.nodes.map(d => {
@@ -64,17 +67,17 @@ class FlowGraph{
         })
         .sort((a, b) => a.numRepeats < b.numRepeats)
         const maxNodesForOneDay = this.data.nodes[0].numRepeats;
-        // const yBase = (this.height - this.verticalMargins * 2 - nodePadding.y * maxNodesForOneDay) / (maxNodesForOneDay);
-        // let nodeHeight = yBase - nodePadding.y * 2;
+        // const yBase = (this.height - this.verticalMargins * 2 - this.nodePadding.y * maxNodesForOneDay) / (maxNodesForOneDay);
+        // let this.nodeHeight = yBase - this.nodePadding.y * 2;
 
         this.data.nodes.map(d => {
             if (d.dayMarker === null) { return d; }
-            const dayIndex = dayValMin < 0 ? d.dayMarker + Math.abs(dayValMin) : d.dayMarker;
-            d.fx =  this.horizontalMargins + (dayIndex * xBase) + ((dayIndex + 1) * nodePadding.x);
+            const dayIndex = this.dayValMin < 0 ? d.dayMarker + Math.abs(this.dayValMin) : d.dayMarker;
+            d.fx =  this.horizontalMargins + (dayIndex * this.xBase) + ((dayIndex + 1) * this.nodePadding.x);
 
             const nodeLevel = d.id.split('.')[1]
             // Top aligned:
-            // d.fy = this.verticalMargins + (nodeLevel * yBase) + ((+nodeLevel + 1) * nodePadding.y);
+            // d.fy = this.verticalMargins + (nodeLevel * yBase) + ((+nodeLevel + 1) * this.nodePadding.y);
             // Center aligned:
             d.fy = (this.height / 2)  - (yBase * (d.numRepeats / 2.0)) + (nodeLevel * yBase)
             return d;
@@ -140,8 +143,8 @@ class FlowGraph{
 
         node.append('rect')
             .attr('class', 'nodeShape')
-            .attr('width', nodeWidth)
-            .attr('height', nodeHeight)
+            .attr('width', this.nodeWidth)
+            .attr('height', this.nodeHeight)
             .attr('rx', '15')
             .attr('ry', '15')
             .style('stroke', '#003366')
@@ -151,8 +154,8 @@ class FlowGraph{
         const nodeContent = node.append('foreignObject')
             .attr('x', d => d.x)
             .attr('y', d => d.y)
-            .attr('width', nodeWidth)
-            .attr('height', nodeHeight)
+            .attr('width', this.nodeWidth)
+            .attr('height', this.nodeHeight)
             .style('color', '#003366')
             .append('xhtml:div')
             .attr('class', 'flowGraph-node')
@@ -171,13 +174,14 @@ class FlowGraph{
         simulation.force('link')
             .links(this.data.links);
 
-        function ticked() {
 
+        const self = this;
+        function ticked() {
             link.attr('d', function(d) {
-                const x1 = d.source.x + nodeWidth / 2;
-                const y1 = d.source.y + nodeHeight / 2;
-                const x2 = d.target.x + nodeWidth / 2;
-                const y2 = d.target.y + nodeHeight / 2;
+                const x1 = d.source.x + self.nodeWidth / 2;
+                const y1 = d.source.y + self.nodeHeight / 2;
+                const x2 = d.target.x + self.nodeWidth / 2;
+                const y2 = d.target.y + self.nodeHeight / 2;
 
                 return `M ${x1} ${y1} L ${x2} ${y2}`;
             })
@@ -218,6 +222,7 @@ class FlowGraph{
             .style('background-color', '#e6f2ff')
             .style('border-radius', '15px')
             .style('border', '1px solid #003366')
+            .style('font-size', '1.25rem')
 
         modalContainer.append('h2')
             .html(`${d.title} Details`)

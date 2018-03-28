@@ -19,7 +19,7 @@ const levelOne = {
             title: 'Commercial Review Application',
             dayMarker: 0,
             id: '1.0',
-            shortDesc: "garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage garbage",
+            shortDesc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
             infoLinks: [
                 {
                     text: 'Submit plans for review on the development portal',
@@ -31,6 +31,7 @@ const levelOne = {
             title: 'Staff Reviews Development Plan',
             dayMarker: 3,
             id: '2.0',
+            shortDesc: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
             infoLinks: [
                 {
                     text: 'Track your site development application status with Accela Citizen Access',
@@ -41,18 +42,21 @@ const levelOne = {
         {
             title: 'Staff Transmits Review Comments',
             dayMarker: 5,
-            id: '3.0'
+            id: '3.0',
+            shortDesc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
         },
         {
     // 4 AND 4.1 BECAUSE THEY HAPPEN AT SAME TIME-- like version numbers, not decimals (4.1, 2, 3 ... 11, etc)
             title: 'Zoning Plan Approved',
             dayMarker: 6,
-            id: '4.0'
+            id: '4.0',
+            shortDesc: "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
         },
         {
             title: 'Revision and Resubmission Required',
             dayMarker: null,
-            id: '4.1'
+            id: '4.1',
+            shortDesc: "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam..."
         },
     ],
     links: [
