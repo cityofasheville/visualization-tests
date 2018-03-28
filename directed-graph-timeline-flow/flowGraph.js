@@ -57,7 +57,7 @@ class FlowGraph{
 
     render() {
         this.nodeHeight = document.getElementById('test-nodes').offsetHeight
-        const yBase = this.nodeHeight + this.nodePadding.y * 4 // TODO: FIX D.FY SO THAT THIS ISN'T A THING
+        const yBase = this.nodeHeight + this.nodePadding.y // TODO: FIX D.FY SO THAT THIS ISN'T A THING
         d3.select('#test-nodes').remove()
 
         this.data.nodes = this.data.nodes.map(d => {
@@ -70,16 +70,16 @@ class FlowGraph{
         // let this.nodeHeight = yBase - this.nodePadding.y * 2;
 
         this.data.nodes.map(d => {
+            const nodeLevel = d.id.split('.')[1]
+            // Top aligned:
+            // d.fy = this.verticalMargins + (nodeLevel * yBase)
+            // Middle of the page horizontally aligned:
+            d.fy = (this.height / 2)  - (yBase * (maxNodesForOneDay / 2.0)) + (nodeLevel * yBase)
+
             if (d.dayMarker === null) { return d; }
             const dayIndex = this.dayValMin < 0 ? d.dayMarker + Math.abs(this.dayValMin) : d.dayMarker;
             d.fx =  this.horizontalMargins + (dayIndex * this.xBase) + ((dayIndex + 1) * this.nodePadding.x);
 
-            const nodeLevel = d.id.split('.')[1]
-            // Top aligned:
-            // d.fy = this.verticalMargins + (nodeLevel * yBase) + ((+nodeLevel + 1) * this.nodePadding.y);
-            // Center aligned:
-            // TODO: FIX THIS
-            d.fy = (this.height / 2)  - (yBase * (d.numRepeats / 2.0)) + (nodeLevel * yBase)
             return d;
         })
 
