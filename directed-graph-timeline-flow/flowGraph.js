@@ -40,7 +40,7 @@ class FlowGraph{
         // Append titles and text to a div
         // Also, base positioning and stuff on this rather than the other way around
         const testNodes = d3.select('body').append('div')
-            .attr('id', 'test-node')
+            .attr('id', 'test-nodes')
             .selectAll('div')
             .data(this.data.nodes)
             .enter().append('div')
@@ -54,6 +54,10 @@ class FlowGraph{
         testNodes.append('p')
             .html(d => d.shortDesc)
 
+        const nodeHeight = document.getElementById('test-nodes').offsetHeight
+        const yBase = nodeHeight + (nodePadding.y * 2)
+        d3.select('#test-nodes').remove()
+
         this.data.nodes = this.data.nodes.map(d => {
             d.numRepeats = this.data.nodes.filter(node => node.dayMarker === d.dayMarker || node.dayMarker === null).length
             return d;
@@ -63,8 +67,6 @@ class FlowGraph{
         // const yBase = (this.height - this.verticalMargins * 2 - nodePadding.y * maxNodesForOneDay) / (maxNodesForOneDay);
         // let nodeHeight = yBase - nodePadding.y * 2;
 
-        const nodeHeight = document.getElementById('test-node').offsetHeight
-        const yBase = nodeHeight + (nodePadding.y * 2)
 
         this.data.nodes.map(d => {
             if (d.dayMarker === null) { return d; }
