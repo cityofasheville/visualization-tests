@@ -90,7 +90,7 @@ class FlowGraph{
                 .attr('id', 'arrowhead')
                 .attr('markerWidth', 10)
                 .attr('markerHeight', 7)
-                .attr('refX', nodeWidth / 2)
+                .attr('refX', 0)
                 .attr('refY', 3.5)
                 .attr('orient', 'auto')
                 .append('polygon')
@@ -105,15 +105,20 @@ class FlowGraph{
 
         const link = svg.append('g')
             .attr('class', 'links')
-            .selectAll('g')
+            .selectAll('path')
             .data(this.data.links)
-                .enter().append('g')
+                .enter().append('path')
+                .style('stroke', '#003366')
+                .style('stroke-width', '2px')
+                .attr('id', d => `linkPath-${d.source}-${d.target}`)
 
-
-        link.append('line')
-            .style('stroke', '#003366')
-            .style('stroke-width', '3px')
-            .attr('marker-end', 'url(#arrowhead)')
+        svg.append('text')
+            .selectAll('textPath')
+            .data(this.data.links)
+            .enter().append('textPath')
+                .attr('xlink:href', d => `#linkPath-${d.source}-${d.target}`)
+                .attr('startOffset', '47%')
+                .html('&#8594')
 
         const node = svg.append('g')
             .attr('class', 'nodes')
@@ -166,18 +171,19 @@ class FlowGraph{
 
         function ticked() {
 
-            link.select('line')
-                .attr('x1', function(d) { return d.source.x + nodeWidth / 2; })
-                .attr('y1', function(d) { return d.source.y + nodeHeight / 2; })
-                .attr('x2', function(d) { return d.target.x + nodeWidth / 2; })
-                .attr('y2', function(d) { return d.target.y + nodeHeight / 2; });
+            link.attr('d', function(d) {
+                const x1 = d.source.x + nodeWidth / 2;
+                const y1 = d.source.y + nodeHeight / 2;
+                const x2 = d.target.x + nodeWidth / 2;
+                const y2 = d.target.y + nodeHeight / 2;
+
+                return `M ${x1} ${y1} L ${x2} ${y2}`;
+            })
 
             node.attr('transform', d => 'translate(' + d.x + ',' + d.y + ')');
         }
 
         simulation.alphaTarget(1).restart()
-
-        link.append('circle')
 
         function dragstarted(d) {
             if (!d3.event.active) simulation.alphaTarget(0.3).restart();
