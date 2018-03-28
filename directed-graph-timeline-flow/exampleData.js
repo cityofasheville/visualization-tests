@@ -54,7 +54,7 @@ const levelOne = {
         },
         {
             title: 'Revision and Resubmission Required',
-            dayMarker: 6,
+            dayMarker: null,
             id: '4.1',
             shortDesc: "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam..."
         },
