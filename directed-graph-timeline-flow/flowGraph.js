@@ -9,7 +9,7 @@ class FlowGraph{
         this.data = inputData;
 
         this.nodePadding = {
-            x: 7.5,
+            x: 5,
             y: 10,
         };
 
@@ -51,14 +51,13 @@ class FlowGraph{
         testNodes.append('p')
             .html(d => d.shortDesc)
 
-
         // To deal with weird div height issues
         window.addEventListener("load", () => this.render())
     }
 
     render() {
         this.nodeHeight = document.getElementById('test-nodes').offsetHeight
-        const yBase = this.nodeHeight + (this.nodePadding.y * 2)
+        const yBase = this.nodeHeight + this.nodePadding.y * 4 // TODO: FIX D.FY SO THAT THIS ISN'T A THING
         d3.select('#test-nodes').remove()
 
         this.data.nodes = this.data.nodes.map(d => {
@@ -79,6 +78,7 @@ class FlowGraph{
             // Top aligned:
             // d.fy = this.verticalMargins + (nodeLevel * yBase) + ((+nodeLevel + 1) * this.nodePadding.y);
             // Center aligned:
+            // TODO: FIX THIS
             d.fy = (this.height / 2)  - (yBase * (d.numRepeats / 2.0)) + (nodeLevel * yBase)
             return d;
         })
@@ -206,7 +206,6 @@ class FlowGraph{
     renderModal(d) {
         // Given the datum, pop up a modal showing details
         // Modal should have little x in corner that removes it when clicked
-
         this.parentElement.select('svg')
             .style('opacity', 0.25)
             .selectAll('*')
