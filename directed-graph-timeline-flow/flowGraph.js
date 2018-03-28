@@ -113,12 +113,13 @@ class FlowGraph{
                 .attr('id', d => `linkPath-${d.source}-${d.target}`)
 
         svg.append('text')
+            .style('dominant-baseline', 'central')
             .selectAll('textPath')
             .data(this.data.links)
             .enter().append('textPath')
                 .attr('xlink:href', d => `#linkPath-${d.source}-${d.target}`)
                 .attr('startOffset', '47%')
-                .html('&#8594')
+                .html('&#x27A4;')
 
         const node = svg.append('g')
             .attr('class', 'nodes')
