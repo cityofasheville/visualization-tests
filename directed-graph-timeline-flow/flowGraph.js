@@ -2,21 +2,43 @@ class FlowGraph{
 
     constructor(parentElement, inputData = levelOne) {
         this.parentElement = d3.select(parentElement);
-        this.width = this.parentElement.style('width').replace('px', '');
-        this.height = this.parentElement.style('height').replace('px', '');
-        this.verticalMargins = this.height * 0.015;
-        this.horizontalMargins = this.width * 0.015;
         this.data = inputData;
-
         this.nodePadding = {
             x: 5,
             y: 10,
         };
-
         const dayValues = this.data.nodes.map(d => d.dayMarker);
         this.dayValMin = d3.min(dayValues)
-        const daySpan = d3.max(dayValues) + Math.abs(this.dayValMin);
-        this.xBase = (this.width - this.horizontalMargins * 2 - this.nodePadding.x * daySpan) / (daySpan + 1);
+        this.daySpan = d3.max(dayValues) + Math.abs(this.dayValMin);
+
+        // To deal with weird div height issues
+        this.setDimensions()
+        window.addEventListener('load', () => this.render())
+
+        // const resizeEventListener = () => {
+            let resizeTimeout;
+            const resizeThrottler = () => {
+                if ( !resizeTimeout ) {
+                    resizeTimeout = setTimeout(() => {
+                        resizeTimeout = null;
+                        this.setDimensions()
+                        this.render()
+                    }, 250);
+                }
+            }
+            window.addEventListener('resize', resizeThrottler, false);
+        // }
+        // resizeEventListener()
+    }
+
+    setDimensions() {
+        this.parentElement.selectAll('*').remove()
+
+        this.width = this.parentElement.style('width').replace('px', '');
+        this.height = this.parentElement.style('height').replace('px', '');
+        this.verticalMargins = this.height * 0.015;
+        this.horizontalMargins = this.width * 0.015;
+        this.xBase = (this.width - this.horizontalMargins * 2 - this.nodePadding.x * this.daySpan) / (this.daySpan + 1);
         this.nodeWidth = this.xBase - this.nodePadding.x * 2;
 
         // This is necessary because it applies to text height test nodes and real nodes
@@ -50,9 +72,6 @@ class FlowGraph{
 
         testNodes.append('p')
             .html(d => d.shortDesc)
-
-        // To deal with weird div height issues
-        window.addEventListener("load", () => this.render())
     }
 
     render() {
@@ -152,8 +171,6 @@ class FlowGraph{
             .style('fill', '#e6f2ff')
 
         const nodeContent = node.append('foreignObject')
-            .attr('x', d => d.x)
-            .attr('y', d => d.y)
             .attr('width', this.nodeWidth)
             .attr('height', this.nodeHeight)
             .style('color', '#003366')
@@ -173,7 +190,6 @@ class FlowGraph{
 
         simulation.force('link')
             .links(this.data.links);
-
 
         const self = this;
         function ticked() {
@@ -214,7 +230,6 @@ class FlowGraph{
         const modalContainer = d3.select('body').append('div')
             .attr('display', 'block')
             .style('width', '60%')
-            .style('height', '60%')
             .style('position', 'absolute')
             .style('top', '20%')
             .style('left', '20%')
@@ -222,21 +237,15 @@ class FlowGraph{
             .style('border-radius', '15px')
             .style('border', '1px solid #003366')
             .style('font-size', '1.25rem')
-
-        modalContainer.append('h2')
-            .html(`${d.title} Details`)
-            .style('text-align', 'center')
-
-        modalContainer.append('p')
-            .html(d.longDesc)
-            .style('padding', '2% 6%')
+            .style('font-family', "'Open Sans', sans-serif")
+            .style('color', '#003366')
 
         modalContainer.append('div')
-            .html('X')
-            .style('font-weight', 'bolder')
+            .html('&#10005;')
             .style('position', 'absolute')
-            .style('top', '2%')
-            .style('right', '2%')
+            .style('padding', '0.25em')
+            .style('top', '0.5em')
+            .style('right', '0.75em')
             .style('cursor', 'pointer')
             .on('click', () => {
                 modalContainer.remove()
@@ -245,6 +254,26 @@ class FlowGraph{
                     .selectAll('*')
                     .attr('pointer-events', null)
             })
+
+        modalContainer.append('h2')
+            .html(`${d.title} Details`)
+            .style('text-align', 'center')
+
+
+        const modalContainerContents = modalContainer.append('div')
+            .style('padding', '2% 6%')
+
+        modalContainerContents.append('p')
+            .html(d.longDesc)
+
+        if (d.infoLinks) {
+            modalContainerContents.append('ul')
+                .selectAll('li')
+                .data(d.infoLinks)
+                    .enter().append('li')
+                    .html(infoLink => `<a href='${infoLink.url}'>${infoLink.text}</a>`)
+        }
+
 
     }
 }

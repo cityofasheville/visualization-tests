@@ -10,7 +10,7 @@ const levelOne = {
             longDesc: "The Early Assistance program provides a non-mandatory flexible review session for prospective business owners, developers, and designers to receive expert technical advice from staff during the preliminary phase of a project.",
             infoLinks: [
                 {
-                    text: 'schedule an early assistance meeting',
+                    text: 'Schedule an early assistance meeting',
                     url: 'https://develop.early-assistance.ashevillenc.gov/'
                 }
             ]
