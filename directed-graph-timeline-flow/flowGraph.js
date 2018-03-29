@@ -11,24 +11,21 @@ class FlowGraph{
         this.dayValMin = d3.min(dayValues)
         this.daySpan = d3.max(dayValues) + Math.abs(this.dayValMin);
 
-        // To deal with weird div height issues
+        // To deal with weird div height issues, set dimensions firt and only grab them on load
         this.setDimensions()
         window.addEventListener('load', () => this.render())
 
-        // const resizeEventListener = () => {
-            let resizeTimeout;
-            const resizeThrottler = () => {
-                if ( !resizeTimeout ) {
-                    resizeTimeout = setTimeout(() => {
-                        resizeTimeout = null;
-                        this.setDimensions()
-                        this.render()
-                    }, 250);
-                }
+        let resizeTimeout;
+        const resizeThrottler = () => {
+            if ( !resizeTimeout ) {
+                resizeTimeout = setTimeout(() => {
+                    resizeTimeout = null;
+                    this.setDimensions()
+                    this.render()
+                }, 250);
             }
-            window.addEventListener('resize', resizeThrottler, false);
-        // }
-        // resizeEventListener()
+        }
+        window.addEventListener('resize', resizeThrottler, false);
     }
 
     setDimensions() {
@@ -48,11 +45,11 @@ class FlowGraph{
                 text-align: center;
             }
             p {
-                padding: 3px;
+                padding: 2px;
             }
             .flowGraph-node p.title {
                 font-weight: bolder;
-                font-size: 1.15em;
+                font-size: 1.075em;
             }
         `)
 
@@ -132,14 +129,14 @@ class FlowGraph{
                 .enter().append('path')
                 .style('stroke', '#003366')
                 .style('stroke-width', '2px')
-                .attr('id', d => `linkPath-${d.source}-${d.target}`)
+                .attr('id', d => `linkPath-${d.source.id || d.source}-${d.target.id || d.target}`)
 
         svg.append('text')
             .style('dominant-baseline', 'central')
             .selectAll('textPath')
             .data(this.data.links)
             .enter().append('textPath')
-                .attr('xlink:href', d => `#linkPath-${d.source}-${d.target}`)
+                .attr('xlink:href', d => `#linkPath-${d.source.id || d.source}-${d.target.id || d.target}`)
                 .attr('startOffset', '47%')
                 .html('&#x27A4;')
 
