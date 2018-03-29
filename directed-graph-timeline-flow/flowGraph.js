@@ -43,13 +43,15 @@ class FlowGraph{
             .flowGraph-node {
                 width: ${this.nodeWidth}px;
                 text-align: center;
+                margin: 0 auto;
             }
-            p {
-                padding: 2px;
+            .flowGraph-node .nodeContents {
+                padding: 2%;
             }
-            .flowGraph-node p.title {
+            .flowGraph-node div.title {
                 font-weight: bolder;
-                font-size: 1.075em;
+                font-size: 1.15em;
+                padding-top: 0.25em;
             }
         `)
 
@@ -63,12 +65,13 @@ class FlowGraph{
             .attr('class', 'flowGraph-node')
             .style('display', 'inline-block')
 
-        testNodes.append('p')
-            .attr('class', 'title')
+        testNodes.append('div')
+            .attr('class', 'title nodeContents')
             .html(d => d.title)
 
-        testNodes.append('p')
+        testNodes.append('div')
             .html(d => d.shortDesc)
+            .attr('class', 'nodeContents')
     }
 
     render() {
@@ -174,12 +177,13 @@ class FlowGraph{
             .append('xhtml:div')
             .attr('class', 'flowGraph-node')
 
-        nodeContent.append('p')
-            .attr('class', 'title')
+        nodeContent.append('div')
+            .attr('class', 'title nodeContents')
             .html(d => d.title)
 
-        nodeContent.append('p')
+        nodeContent.append('div')
             .html(d => d.shortDesc)
+            .attr('class', 'nodeContents')
 
         simulation
             .nodes(this.data.nodes)
@@ -233,11 +237,11 @@ class FlowGraph{
             .style('background-color', '#e6f2ff')
             .style('border-radius', '15px')
             .style('border', '1px solid #003366')
-            .style('font-size', '1.25rem')
+            .style('font-size', '1.25em')
             .style('font-family', "'Open Sans', sans-serif")
             .style('color', '#003366')
 
-        modalContainer.append('div')
+        const closeX = modalContainer.append('div')
             .html('&#10005;')
             .style('position', 'absolute')
             .style('padding', '0.25em')
@@ -252,15 +256,17 @@ class FlowGraph{
                     .attr('pointer-events', null)
             })
 
-        modalContainer.append('h2')
+        modalContainer.append('div')
             .html(`${d.title} Details`)
             .style('text-align', 'center')
-
+            .style('font-size', '1.25em')
+            .style('padding', '2%')
 
         const modalContainerContents = modalContainer.append('div')
-            .style('padding', '2% 6%')
+            .style('top', '0px')
+            .style('padding', '1% 6%')
 
-        modalContainerContents.append('p')
+        modalContainerContents.append('div')
             .html(d.longDesc)
 
         if (d.infoLinks) {
