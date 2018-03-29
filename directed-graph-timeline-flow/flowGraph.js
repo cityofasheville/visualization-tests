@@ -107,17 +107,6 @@ class FlowGraph{
             .attr('height', this.height)
             .attr('tabindex', 0)
 
-        svg.append('defs')
-            .append('marker')
-                .attr('id', 'arrowhead')
-                .attr('markerWidth', 10)
-                .attr('markerHeight', 7)
-                .attr('refX', 0)
-                .attr('refY', 3.5)
-                .attr('orient', 'auto')
-                .append('polygon')
-                    .attr('points', '0 0, 10 3.5, 0 7')
-
         const simulation = d3.forceSimulation()
             .force('link', d3.forceLink()
                 .id(d => d.id)
@@ -208,16 +197,16 @@ class FlowGraph{
 
         simulation.alphaTarget(1).restart()
 
-        function dragstarted(d) {
-            if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-            d.fx = d.x;
-            d.fy = d.y;
-        }
+        // function dragstarted(d) {
+        //     if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+        //     d.fx = d.x;
+        //     d.fy = d.y;
+        // }
 
-        function dragged(d) {
-            d.fx = d3.event.x;
-            d.fy = d3.event.y;
-        }
+        // function dragged(d) {
+        //     d.fx = d3.event.x;
+        //     d.fy = d3.event.y;
+        // }
     }
 
     renderModal(d) {
